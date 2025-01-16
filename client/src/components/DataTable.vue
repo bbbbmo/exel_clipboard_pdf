@@ -1,6 +1,12 @@
 <!-- src/components/DataTable.vue -->
 <template>
   <v-container>
+    <ExcelHandler
+      :data="items"
+      :headers="headers"
+      @importedData="handleImportedData"
+    />
+
     <v-row class="my-4">
       <v-col cols="12" class="d-flex justify-end">
         <v-btn color="primary" @click="copyToClipboard">
@@ -54,7 +60,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios"; // axios 임포트
+import ExcelHandler from "./ExelHandler.vue"; // ExcelHandler 컴포넌트 임포트
 
+// 데이터 테이블 헤더더
 const headers = ref([
   { text: "ID", value: "id" },
   { text: "이름", value: "name" },
@@ -98,6 +106,13 @@ onMounted(() => {
   fetchData();
 });
 
+// 엑셀에서 가져온 데이터를 처리하는 함수
+const handleImportedData = (importedData) => {
+  // 필요한 경우 데이터 검증 또는 변환
+  items.value = importedData;
+  showSnackbar("엑셀 데이터를 성공적으로 가져왔습니다!");
+};
+
 // HTML 테이블을 문자열로 변환하는 함수
 const generateHTMLTable = (data) => {
   let html = "<table border='1'><thead><tr>";
@@ -116,7 +131,7 @@ const generateHTMLTable = (data) => {
   return html;
 };
 
-// 클립보드에 HTML 형식으로 복사 (Clipboard API 사용)
+// 특정 데이터를 클립보드에 HTML 형식으로 복사 (Clipboard API 사용)
 const copyToClipboard = async () => {
   if (selected.value.length === 0) {
     showSnackbar("복사할 데이터를 선택해주세요.", "warning");
